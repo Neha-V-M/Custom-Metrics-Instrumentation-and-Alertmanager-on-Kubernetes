@@ -99,6 +99,8 @@ flowchart LR
     P --> G[Grafana]
 ```
 
+---
+
 ![Architecture](screenshots/architecture.png)
 *End-to-end flow: user traffic to service-a, ServiceMonitor discovery, Prometheus scraping, and Alertmanager email alerts.*
 
