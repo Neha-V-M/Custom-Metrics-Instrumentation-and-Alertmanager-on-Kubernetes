@@ -25,8 +25,9 @@ Hands-on project showing how to instrument a Node.js application with custom Pro
 11. [Configuring Alertmanager](#11-configuring-alertmanager)
 12. [Testing the Alert](#12-testing-the-alert)
 13. [Troubleshooting](#13-troubleshooting)
-14. [Security Notes](#15-security-notes)
-15. [Cleanup](#16-cleanup)
+14. [Screenshots](#14-screenshots)
+15. [Security Notes](#15-security-notes)
+16. [Cleanup](#16-cleanup)
 
 ---
 
@@ -97,6 +98,11 @@ flowchart LR
     AM -->|SMTP / receiver: send-mail| E[Email notification]
     P --> G[Grafana]
 ```
+
+![Architecture](screenshots/architecture.png)
+*End-to-end flow: user traffic to service-a, ServiceMonitor discovery, Prometheus scraping, and Alertmanager email alerts.*
+
+---
 
 **Flow summary**
 
@@ -349,7 +355,51 @@ kubectl apply -k .
 
 ---
 
-## 14. Security Notes
+## Screenshots
+
+### 1. Deployment
+
+| Pods running in `dev` and `monitoring` | `service-a` exposed as LoadBalancer |
+|:---:|:---:|
+| ![Pods running](screenshots/pods_running.png) | ![Services](screenshots/services.png) |
+
+*All pods in `Running` state, and `service-a` exposed through a LoadBalancer service.*
+
+---
+
+### 2. Application Metrics Endpoint
+
+![Metrics endpoint](screenshots/metrics_endpoint.png)
+*Raw metrics exposed by `service-a` at `/metrics` in Prometheus format.*
+
+---
+
+### 3. Service Discovery with ServiceMonitor
+
+![Prometheus targets](screenshots/prometheus_targets.png)
+*Status → Targets page showing `service-a` as UP after applying the ServiceMonitor.*
+
+![http_requests_total](screenshots/http_requests_total.png)
+*`http_requests_total` returning data in Prometheus. Before the ServiceMonitor was applied, this query returned nothing.*
+
+---
+
+### 4. Custom Histogram Metric
+
+![Histogram buckets](screenshots/histogram.png)
+*`http_request_duration_seconds_bucket` showing request durations grouped into histogram buckets.*
+
+---
+
+### 5. Alerting
+
+![Pod restarts](screenshots/pod_restarts.png)
+*Pod restart count increasing after hitting the `/crash` endpoint.*
+
+![Alert email](screenshots/alert_email.png)
+*Email notification received from Alertmanager after the pod crashed.*
+
+## 15. Security Notes
 
 - `email-secrets.yaml` contains a credential. Base64 is **encoding, not encryption**; anyone can decode it.
 - Only `email-secrets.example.yaml` (placeholders) is committed.
@@ -359,7 +409,7 @@ kubectl apply -k .
 
 ---
 
-## 15. Cleanup
+## 16. Cleanup
 
 ```bash
 kubectl delete -k k8s-manifests/
